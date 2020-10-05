@@ -1,0 +1,4 @@
+jobos: ubuntu16
+cbmcflags: '=--object-bits;7;--32;--bounds-check;--pointer-check;--unwindset;--nondet-static;--flush;--unwinding-assertions='
+goto: Cellular_CommonInit.goto
+expected: SUCCESSFUL

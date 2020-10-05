@@ -90,8 +90,7 @@ static void createSocketSetSocketData( uint8_t contextId,
 static uint8_t _getSignalBars( int16_t compareValue,
                                CellularRat_t rat );
 static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHandle,
-                                           const CellularCommInterface_t * pCommInterface,
-                                           const CellularTokenTable_t * pTokenTable );
+                                           const CellularCommInterface_t * pCommInterface );
 
 /*-----------------------------------------------------------*/
 
@@ -250,56 +249,43 @@ static CellularError_t libOpen( CellularContext_t * pContext )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    
+    IotMutex_Lock( &pContext->libStatusMutex );
 
-    if( pContext == NULL )
+    if( cellularStatus == CELLULAR_SUCCESS )
     {
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else
-    {
-        IotMutex_Lock( &pContext->libStatusMutex );
+        _Cellular_AtParseInit( pContext );
+        _Cellular_LockAtDataMutex( pContext );
+        _Cellular_InitAtData( pContext, 0 );
+        _Cellular_UnlockAtDataMutex( pContext );
+        _Cellular_PktioSetShutdownCallback( pContext, _shutdownCallback );
+        pktStatus = _Cellular_PktHandlerInit( pContext );
 
-        if( ( pContext->bLibOpened == true ) || ( pContext->bLibClosing == true ) )
+        if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
-            cellularStatus = CELLULAR_LIBRARY_ALREADY_OPEN;
-        }
-
-        if( cellularStatus == CELLULAR_SUCCESS )
-        {
-            _Cellular_AtParseInit( pContext );
-            _Cellular_LockAtDataMutex( pContext );
-            _Cellular_InitAtData( pContext, 0 );
-            _Cellular_UnlockAtDataMutex( pContext );
-            _Cellular_PktioSetShutdownCallback( pContext, _shutdownCallback );
-            pktStatus = _Cellular_PktHandlerInit( pContext );
-
-            if( pktStatus == CELLULAR_PKT_STATUS_OK )
-            {
-                pktStatus = _Cellular_PktioInit( pContext, _Cellular_HandlePacket );
-
-                if( pktStatus != CELLULAR_PKT_STATUS_OK )
-                {
-                    IotLogError( "pktio failed to initialize" );
-                    _Cellular_PktioShutdown( pContext );
-                    _Cellular_PktHandlerCleanup( pContext );
-                }
-            }
+            pktStatus = _Cellular_PktioInit( pContext, _Cellular_HandlePacket );
 
             if( pktStatus != CELLULAR_PKT_STATUS_OK )
             {
-                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+                IotLogError( "pktio failed to initialize" );
+                _Cellular_PktioShutdown( pContext );
+                _Cellular_PktHandlerCleanup( pContext );
             }
         }
 
-        if( cellularStatus == CELLULAR_SUCCESS )
+        if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            /* CellularLib open finished. */
-            pContext->bLibOpened = true;
-            pContext->bLibShutdown = false;
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
-
-        IotMutex_Unlock( &pContext->libStatusMutex );
     }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        /* CellularLib open finished. */
+        pContext->bLibOpened = true;
+        pContext->bLibShutdown = false;
+    }
+    IotMutex_Unlock( &pContext->libStatusMutex );
 
     return cellularStatus;
 }
@@ -439,8 +425,7 @@ static uint8_t _getSignalBars( int16_t compareValue,
 /*-----------------------------------------------------------*/
 
 static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHandle,
-                                           const CellularCommInterface_t * pCommInterface,
-                                           const CellularTokenTable_t * pTokenTable )
+                                           const CellularCommInterface_t * pCommInterface )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
@@ -455,17 +440,6 @@ static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHan
     {
         IotLogError( "All the functions in the CellularCommInterface should be valid." );
         cellularStatus = CELLULAR_BAD_PARAMETER;
-    }
-    else
-    {
-        if( ( pTokenTable == NULL ) || ( pTokenTable->pCellularUrcHandlerTable == NULL ) ||
-            ( pTokenTable->pCellularSrcTokenErrorTable == NULL ) ||
-            ( pTokenTable->pCellularSrcTokenSuccessTable == NULL ) ||
-            ( pTokenTable->pCellularUrcTokenWoPrefixTable == NULL ) )
-        {
-            IotLogError( "All the token tables in the CellularTokenTable should be valid." );
-            cellularStatus = CELLULAR_BAD_PARAMETER;
-        }
     }
 
     return cellularStatus;
@@ -616,14 +590,10 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
 
     taskEXIT_CRITICAL();
 
-    if( cellularStatus == CELLULAR_NO_MEMORY )
+    if( cellularStatus == CELLULAR_NO_MEMORY ||
+        socketId >= CELLULAR_NUM_SOCKET_MAX )
     {
         IotLogError( "_Cellular_CreateSocket, Out of memory" );
-    }
-    else if( socketId >= CELLULAR_NUM_SOCKET_MAX )
-    {
-        IotLogError( "_Cellular_CreateSocket, No free socket slots are available" );
-        cellularStatus = CELLULAR_NO_MEMORY;
     }
     else
     {
@@ -974,7 +944,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
     bool bPktRequestMutexCreateSuccess = false;
     bool bPktResponseMutexCreateSuccess = false;
 
-    cellularStatus = checkInitParameter( pCellularHandle, pCommInterface, pTokenTable );
+    cellularStatus = checkInitParameter( pCellularHandle, pCommInterface );
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
@@ -1102,20 +1072,13 @@ CellularError_t _Cellular_LibCleanup( CellularHandle_t cellularHandle )
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
-    if( pContext == NULL )
-    {
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else
-    {
-        libClose( pContext );
+    libClose( pContext );
 
-        _Cellular_DestroyLibStatusMutex( pContext );
-        _Cellular_DestroyAtDataMutex( pContext );
-        _Cellular_DestroyPktRequestMutex( pContext );
-        _Cellular_DestroyPktResponseMutex( pContext );
-        _Cellular_FreeContext( pContext );
-    }
+    _Cellular_DestroyLibStatusMutex( pContext );
+    _Cellular_DestroyAtDataMutex( pContext );
+    _Cellular_DestroyPktRequestMutex( pContext );
+    _Cellular_DestroyPktResponseMutex( pContext );
+    _Cellular_FreeContext( pContext );
 
     return cellularStatus;
 }

@@ -353,11 +353,7 @@ CellularError_t Cellular_CommonCreateSocket( CellularHandle_t cellularHandle,
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
 
-    if( cellularStatus != CELLULAR_SUCCESS )
-    {
-        IotLogDebug( "_Cellular_CheckLibraryStatus failed" );
-    }
-    else if( pSocketHandle == NULL )
+    if( pSocketHandle == NULL )
     {
         IotLogError( "pSocketHandle is NULL" );
         cellularStatus = CELLULAR_BAD_PARAMETER;
