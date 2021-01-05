@@ -1,0 +1,90 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: µVision V5.28.0.0
+Copyright (C) 2019 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: Andy Sun, AWS, LIC=Z3C00-VD3KV-5C0YS-4YQHG-5HIEK-FI8B2
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Professional  Version: 5.28.0.0
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 6 (build 750)
+Assembler:       Armasm.exe V5.06 update 6 (build 750)
+Linker/Locator:  ArmLink.exe V5.06 update 6 (build 750)
+Library Manager: ArmAr.exe V5.06 update 6 (build 750)
+Hex Converter:   FromElf.exe V5.06 update 6 (build 750)
+CPU DLL:         SARMCM3.DLL V5.28.0.0
+Dialog DLL:      DCM.DLL V1.17.3.0
+Target DLL:      CMSIS_AGDI.dll V1.31.18.0
+Dialog DLL:      TCM.DLL V1.36.2.0
+ 
+<h2>Project:</h2>
+C:\Andy\AFR\source_code\andy_repo\amazon-freertos\projects\ublox\c030_r412m\uvision\aws_demos\aws_demos.uvprojx
+Project File Date:  11/26/2020
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'aws_demos'
+compiling cborpretty.c...
+../../../../../libraries/3rdparty/tinycbor/src/compilersupport_p.h(191): error:  #35: #error directive: "Unable to determine byte order!"
+  #      error "Unable to determine byte order!"
+../../../../../libraries/3rdparty/tinycbor/src/cborpretty.c: 0 warnings, 1 error
+compiling entropy_poll.c...
+../../../../../libraries/3rdparty/mbedtls/library/entropy_poll.c(82): error:  #35: #error directive: "Platform entropy sources only work on Unix and Windows, see MBEDTLS_NO_PLATFORM_ENTROPY in config.h"
+  #error "Platform entropy sources only work on Unix and Windows, see MBEDTLS_NO_PLATFORM_ENTROPY in config.h"
+../../../../../libraries/3rdparty/mbedtls/library/entropy_poll.c: 0 warnings, 1 error
+compiling net_sockets.c...
+../../../../../libraries/3rdparty/mbedtls/library/net_sockets.c(65): error:  #35: #error directive: "This module only works on Unix and Windows, see MBEDTLS_NET_C in config.h"
+  #error "This module only works on Unix and Windows, see MBEDTLS_NET_C in config.h"
+../../../../../libraries/3rdparty/mbedtls/library/net_sockets.c: 0 warnings, 1 error
+compiling main.c...
+..\..\..\..\..\vendors\ublox\boards\c030_r412m\aws_demos\application_code\main.h(31): error:  #5: cannot open source input file "stm32f7xx_hal.h": No such file or directory
+  #include "stm32f7xx_hal.h"
+..\..\..\..\..\vendors\ublox\boards\c030_r412m\aws_demos\application_code\main.c: 0 warnings, 1 error
+compiling iot_secure_sockets.c...
+../../../../../vendors/ublox/boards/c030_r412m/aws_demos/config_files/FreeRTOSConfig.h(319): warning:  #1295-D: Deprecated declaration ulRand - give arg types
+  extern uint32_t ulRand();
+../../../../../libraries/3rdparty/lwip/src/include/lwip/opt.h(51): error:  #5: cannot open source input file "lwipopts.h": No such file or directory
+  #include "lwipopts.h"
+../../../../../libraries/abstractions/secure_sockets/lwip/iot_secure_sockets.c: 1 warning, 1 error
+compiling timing.c...
+../../../../../libraries/3rdparty/mbedtls/library/timing.c(71): error:  #35: #error directive: "This module only works on Unix and Windows, see MBEDTLS_TIMING_C in config.h"
+  #error "This module only works on Unix and Windows, see MBEDTLS_TIMING_C in config.h"
+../../../../../libraries/3rdparty/mbedtls/library/timing.c: 0 warnings, 1 error
+compiling x509_crt.c...
+../../../../../libraries/3rdparty/mbedtls/library/x509_crt.c(102): error:  #5: cannot open source input file "sys/types.h": No such file or directory
+  #include <sys/types.h>
+../../../../../libraries/3rdparty/mbedtls/library/x509_crt.c: 0 warnings, 1 error
+compiling cborencoder.c...
+../../../../../libraries/3rdparty/tinycbor/src/compilersupport_p.h(191): error:  #35: #error directive: "Unable to determine byte order!"
+  #      error "Unable to determine byte order!"
+../../../../../libraries/3rdparty/tinycbor/src/cborencoder.c: 0 warnings, 1 error
+compiling cborparser.c...
+../../../../../libraries/3rdparty/tinycbor/src/compilersupport_p.h(191): error:  #35: #error directive: "Unable to determine byte order!"
+  #      error "Unable to determine byte order!"
+../../../../../libraries/3rdparty/tinycbor/src/cborparser.c: 0 warnings, 1 error
+compiling cborparser_dup_string.c...
+../../../../../libraries/3rdparty/tinycbor/src/compilersupport_p.h(191): error:  #35: #error directive: "Unable to determine byte order!"
+  #      error "Unable to determine byte order!"
+../../../../../libraries/3rdparty/tinycbor/src/cborparser_dup_string.c: 0 warnings, 1 error
+".\out\Objects\aws_demos.axf" - 10 Error(s), 1 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: Keil
+                http://www.keil.com/pack/Keil.STM32F4xx_DFP.2.14.0.pack
+                Keil.STM32F4xx_DFP.2.14.0
+                STMicroelectronics STM32F4 Series Device Support, Drivers and Examples
+
+<h2>Collection of Component include folders:</h2>
+  .\RTE\_aws_demos
+  C:\Users\smn\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.14.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
+
+<h2>Collection of Component Files used:</h2>
+Target not created.
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>
